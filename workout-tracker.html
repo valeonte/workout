@@ -1,0 +1,480 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  .wt {
+    --ink:        #16181D;
+    --ink-2:      #1E2128;
+    --ink-3:      #272B34;
+    --line:       #333845;
+    --paper:      #EDEFF2;
+    --muted:      #8B93A3;
+    --go:         #00C2B2;
+    --go-dim:     #0B4E4A;
+    --care:       #FFB02E;
+    --care-dim:   #4A3410;
+    --done:       #00C2B2;
+
+    --display: 'Barlow Condensed', 'Oswald', 'Helvetica Neue', system-ui, sans-serif;
+    --body: 'Inter', system-ui, -apple-system, sans-serif;
+
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--body);
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 0 90px;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
+  }
+
+  .wt button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  .wt input { font-family: inherit; }
+  .wt :focus-visible { outline: 2px solid var(--go); outline-offset: 2px; }
+
+  /* ---------- header ---------- */
+  .wt-top {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--ink);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 16px 0;
+  }
+  .wt-title {
+    font-family: var(--display);
+    font-size: 26px; font-weight: 700; letter-spacing: .02em;
+    text-transform: uppercase; line-height: 1;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  }
+  .wt-title span { font-family: var(--body); font-size: 11px; font-weight: 500; color: var(--muted); text-transform: none; letter-spacing: 0; }
+
+  .wt-days { display: flex; gap: 6px; margin: 12px 0 0; }
+  .wt-day {
+    flex: 1; padding: 9px 4px 11px; border-radius: 8px 8px 0 0;
+    background: var(--ink-2); color: var(--muted);
+    font-family: var(--display); font-size: 17px; font-weight: 600;
+    letter-spacing: .04em; text-transform: uppercase;
+    border-bottom: 3px solid transparent; transition: .15s;
+  }
+  .wt-day small { display: block; font-family: var(--body); font-size: 9.5px; font-weight: 500; letter-spacing: .02em; opacity: .75; text-transform: none; }
+  .wt-day[aria-selected="true"] { background: var(--ink-3); color: var(--paper); border-bottom-color: var(--go); }
+
+  .wt-bar { height: 3px; background: var(--ink-3); border-radius: 2px; overflow: hidden; margin: 10px 0 12px; }
+  .wt-bar i { display: block; height: 100%; background: var(--go); width: 0; transition: width .3s; }
+
+  /* ---------- cards ---------- */
+  .wt-list { padding: 14px 12px 0; display: flex; flex-direction: column; gap: 9px; }
+
+  .wt-card { background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .wt-card[data-flag="care"] { border-left: 3px solid var(--care); }
+  .wt-card[data-done="1"] { border-color: var(--go-dim); }
+  .wt-card[data-done="1"] .wt-name { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--go); }
+
+  .wt-head { width: 100%; display: flex; align-items: center; gap: 11px; padding: 13px 13px; text-align: left; }
+  .wt-idx {
+    flex: 0 0 26px; height: 26px; border-radius: 50%;
+    background: var(--ink-3); color: var(--muted);
+    font-family: var(--display); font-size: 15px; font-weight: 600;
+    display: grid; place-items: center;
+  }
+  .wt-card[data-done="1"] .wt-idx { background: var(--go-dim); color: var(--go); }
+  .wt-headtext { flex: 1; min-width: 0; }
+  .wt-name { font-family: var(--display); font-size: 19.5px; font-weight: 600; letter-spacing: .01em; line-height: 1.12; }
+  .wt-target { font-size: 11.5px; color: var(--muted); margin-top: 2px; letter-spacing: .01em; }
+  .wt-chev { flex: 0 0 auto; color: var(--muted); font-size: 12px; transition: transform .2s; }
+  .wt-card[aria-expanded="true"] .wt-chev { transform: rotate(90deg); }
+
+  .wt-body { display: none; padding: 0 13px 13px; }
+  .wt-card[aria-expanded="true"] .wt-body { display: block; }
+
+  /* ---------- prescription band (signature) ---------- */
+  .wt-rx { margin: 2px 0 12px; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+  .wt-rx-seg { display: flex; }
+  .wt-rx-seg div {
+    flex: 1; padding: 7px 4px; text-align: center;
+    font-family: var(--display); font-size: 13px; font-weight: 600;
+    letter-spacing: .09em; text-transform: uppercase; color: #5C6474;
+    background: var(--ink-3); border-right: 1px solid var(--line);
+  }
+  .wt-rx-seg div:last-child { border-right: none; }
+  .wt-rx-seg div[data-on="1"] { background: var(--go); color: #06231F; }
+  .wt-rx-note { padding: 8px 11px; font-size: 12px; color: var(--paper); background: rgba(0,194,178,.07); }
+  .wt-rx-note b { color: var(--go); font-weight: 600; }
+
+  .wt-note { font-size: 12.5px; color: var(--muted); margin: 0 0 11px; }
+  .wt-note[data-flag="care"] { color: var(--care); background: var(--care-dim); padding: 8px 10px; border-radius: 7px; }
+
+  /* ---------- sets ---------- */
+  .wt-prev { font-size: 11px; color: var(--muted); margin-bottom: 7px; letter-spacing: .02em; }
+  .wt-prev b { color: var(--paper); font-weight: 600; }
+
+  .wt-set { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+  .wt-set-n { flex: 0 0 22px; font-family: var(--display); font-size: 14px; color: var(--muted); font-weight: 600; }
+  .wt-in {
+    flex: 1; min-width: 0; background: var(--ink); border: 1px solid var(--line);
+    border-radius: 8px; padding: 11px 9px; color: var(--paper);
+    font-size: 15px; font-weight: 500; text-align: center; -moz-appearance: textfield;
+  }
+  .wt-in::-webkit-outer-spin-button, .wt-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .wt-in::placeholder { color: #4E5665; font-weight: 400; }
+  .wt-unit { flex: 0 0 auto; font-size: 10.5px; color: var(--muted); letter-spacing: .04em; }
+  .wt-tick {
+    flex: 0 0 44px; height: 42px; border-radius: 8px;
+    background: var(--ink-3); color: #5C6474; font-size: 17px;
+    display: grid; place-items: center; transition: .12s;
+  }
+  .wt-tick[data-on="1"] { background: var(--go); color: #06231F; }
+
+  /* ---------- swap ---------- */
+  .wt-swap {
+    margin-top: 3px; font-size: 11.5px; color: var(--go);
+    font-weight: 600; letter-spacing: .03em; padding: 6px 0;
+  }
+  .wt-alts { display: none; margin-top: 6px; border-top: 1px solid var(--line); padding-top: 8px; }
+  .wt-alts[data-open="1"] { display: block; }
+  .wt-alt {
+    display: block; width: 100%; text-align: left; padding: 9px 10px; margin-bottom: 5px;
+    background: var(--ink); border: 1px solid var(--line); border-radius: 7px;
+    font-size: 13px; font-weight: 500;
+  }
+  .wt-alt em { display: block; font-style: normal; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .wt-alt[data-active="1"] { border-color: var(--go); color: var(--go); }
+
+  /* ---------- rest timer ---------- */
+  .wt-rest {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: 0;
+    width: 100%; max-width: 560px; z-index: 30;
+    background: var(--ink-3); border-top: 1px solid var(--line);
+    padding: 11px 16px calc(11px + env(safe-area-inset-bottom));
+    display: none; align-items: center; gap: 12px;
+  }
+  .wt-rest[data-on="1"] { display: flex; }
+  .wt-clock { font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: .02em; min-width: 74px; }
+  .wt-clock[data-zero="1"] { color: var(--go); }
+  .wt-restbar { flex: 1; height: 5px; background: var(--ink); border-radius: 3px; overflow: hidden; }
+  .wt-restbar i { display: block; height: 100%; background: var(--go); width: 100%; }
+  .wt-restbtn { padding: 9px 13px; background: var(--ink-2); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; font-weight: 600; }
+
+  /* ---------- footer ---------- */
+  .wt-foot { padding: 22px 16px 10px; }
+  .wt-foot p { font-size: 11px; color: var(--muted); line-height: 1.5; margin: 0 0 12px; }
+  .wt-reset { font-size: 11.5px; color: var(--muted); text-decoration: underline; padding: 6px 0; }
+  .wt-status { font-size: 11px; color: var(--muted); padding: 0 16px; min-height: 15px; }
+</style>
+
+<div class="wt">
+  <div class="wt-top">
+    <div class="wt-title">
+      Session log
+      <span id="wtDate"></span>
+    </div>
+    <div class="wt-days" role="tablist" id="wtDays"></div>
+    <div class="wt-bar"><i id="wtProg"></i></div>
+  </div>
+
+  <div class="wt-status" id="wtStatus">Loading your last session…</div>
+  <div class="wt-list" id="wtList"></div>
+
+  <div class="wt-foot">
+    <p>Depth on lunges, split squats and squats is pain-free range as tolerated — not a fixed target. Confirm the plan with your physio; this tracker isn't medical advice.</p>
+    <button class="wt-reset" id="wtReset">Clear all saved history</button>
+  </div>
+
+  <div class="wt-rest" id="wtRest">
+    <div class="wt-clock" id="wtClock">1:30</div>
+    <div class="wt-restbar"><i id="wtRestBar"></i></div>
+    <button class="wt-restbtn" id="wtRestAdd">+30s</button>
+    <button class="wt-restbtn" id="wtRestStop">Skip</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const KEY = 'meniscus-routine-v1';
+  const REST = 90;
+
+  // load/depth rotation for the two combo lifts
+  const RX = ['Light', 'Moderate', 'Heavy'];
+
+  const PLAN = {
+    mon: {
+      label: 'Mon', sub: 'Full depth',
+      ex: [
+        { id: 'row-wu', name: 'Rowing', target: '5 min easy', kind: 'time', note: 'Warm-up. Steady pace, nothing hard.' },
+        { id: 'sq-ohp', name: 'Squat → Overhead Press', target: '3 × 8', rx: 0,
+          note: 'One continuous rep: squat, stand, press overhead on the way up. Heels raised on plates.',
+          rxNote: 'Light load, <b>full depth</b>. This is the day you chase range, not weight.',
+          alts: [{ n: 'DB Squat → DB Overhead Press', d: 'If the rack is taken — same rep pattern, one DB per hand' }] },
+        { id: 'dl-ur', name: 'Deadlift → Upright Row', target: '3 × 8', rx: 0,
+          note: 'One continuous rep: pull to lockout, then keep pulling into the upright row.',
+          rxNote: 'Light to moderate load.',
+          alts: [{ n: 'DB Deadlift → DB Upright Row', d: 'Rack taken — DBs stay closer to the body through the pull' }] },
+        { id: 'split-sq', name: 'Split Squat', target: '3 × 8 / leg', flag: 'care',
+          note: 'Depth as tolerated on the operated knee. Back off if anything pinches.' },
+        { id: 'pulldown', name: 'Cable Lat Pulldown', target: '3 × 10', note: 'Wide grip.',
+          alts: [{ n: 'DB Pullover', d: 'On a bench — similar lat emphasis' }, { n: 'Bent-Over DB Row', d: 'Light–moderate only, hinge is loaded' }] },
+        { id: 'trx-row', name: 'TRX Row', target: '3 × 10',
+          alts: [{ n: 'Bent-Over DB Row', d: 'Two DBs, hips hinged, light–moderate' }, { n: 'Cable Seated Row', d: 'If the cable station is free' }] },
+        { id: 'soleus', name: 'Soleus Raise', target: '3 × 15', flag: 'care', note: 'Knees bent, slow tempo up and down.' },
+        { id: 'plank', name: 'Plank', target: '3 × 30–45s', kind: 'time' }
+      ]
+    },
+    wed: {
+      label: 'Wed', sub: 'Reduced depth',
+      ex: [
+        { id: 'row-wu', name: 'Rowing', target: '5 min easy', kind: 'time', note: 'Warm-up.' },
+        { id: 'sq-ohp', name: 'Squat → Overhead Press', target: '3 × 8', rx: 1,
+          note: 'One continuous rep. Heels raised.',
+          rxNote: 'Moderate load, <b>reduced depth</b>. Range comes down as load goes up.',
+          alts: [{ n: 'DB Squat → DB Overhead Press', d: 'Rack taken — same pattern with DBs' }] },
+        { id: 'sldl-bench', name: 'Stiff-Leg Deadlift on Bench', target: '3 × 8',
+          note: 'Feet together on the bench, legs straight, small weight, hinge all the way down.',
+          alts: [{ n: 'Standing Stiff-Leg Deadlift', d: 'Both benches busy — shorter range, same pattern' }] },
+        { id: 'walk-lunge', name: 'Walking Lunge', target: '3 × 8 / leg', flag: 'care', note: 'Depth as tolerated.' },
+        { id: 'bench', name: 'Barbell Bench Press', target: '3 × 8',
+          alts: [{ n: 'DB Floor Press', d: 'No bench free — shorter range, easier on the shoulder' }] },
+        { id: 'seated-row', name: 'Cable Seated Row', target: '3 × 10',
+          alts: [{ n: 'Bent-Over DB Row', d: 'Two DBs, light–moderate' }, { n: 'TRX Row', d: 'If the straps are free' }] },
+        { id: 'spanish-sq', name: 'Spanish Squat', target: '3 × 12', flag: 'care',
+          note: 'Band behind the knees. Normal tempo reps — no long isometric hold.' },
+        { id: 'deadbug', name: 'Alternating Dead Bug', target: '3 × 10', kind: 'reps' }
+      ]
+    },
+    fri: {
+      label: 'Fri', sub: 'Shallow depth',
+      ex: [
+        { id: 'row-wu', name: 'Rowing', target: '5 min easy', kind: 'time', note: 'Warm-up.' },
+        { id: 'sq-ohp', name: 'Squat → Overhead Press', target: '3 × 8', rx: 2,
+          note: 'One continuous rep. Heels raised on plates.',
+          rxNote: 'Heavy load, <b>shallow depth</b>. Heaviest day of the week — smallest range.',
+          alts: [{ n: 'DB Squat → DB Overhead Press', d: 'Rack taken — or hold one heavy DB goblet-style if grip fails first' }] },
+        { id: 'dl-ur', name: 'Deadlift → Upright Row', target: '3 × 8', rx: 2,
+          note: 'One continuous rep.', rxNote: 'Moderate to heavy load.',
+          alts: [{ n: 'DB Deadlift → DB Upright Row', d: 'Rack taken' }] },
+        { id: 'static-lunge', name: 'Static Lunge', target: '3 × 8 / leg', flag: 'care', note: 'Depth as tolerated.' },
+        { id: 'incline', name: 'DB Incline Bench Press', target: '3 × 8',
+          alts: [{ n: 'DB Floor Press', d: 'No bench free' }] },
+        { id: 'pulldown', name: 'Cable Lat Pulldown', target: '3 × 10', note: 'Wide grip.',
+          alts: [{ n: 'DB Pullover', d: 'On a bench' }, { n: 'Bent-Over DB Row', d: 'Light–moderate' }] },
+        { id: 'soleus', name: 'Soleus Raise', target: '3 × 15', flag: 'care', note: 'Knees bent, slow tempo.' },
+        { id: 'plank', name: 'Plank', target: '3 × 30–45s', kind: 'time' }
+      ]
+    }
+  };
+
+  const DAYS = ['mon', 'wed', 'fri'];
+  const today = new Date();
+  const dayKey = ['fri', 'mon', 'mon', 'wed', 'wed', 'fri', 'fri'][today.getDay()];
+  const stamp = today.toISOString().slice(0, 10);
+
+  let state = { sessions: {}, last: {}, swaps: {} };
+  let active = dayKey;
+  let saveTimer = null;
+
+  const $ = id => document.getElementById(id);
+  const status = m => { $('wtStatus').textContent = m || ''; };
+
+  // ---------- storage ----------
+  async function load() {
+    try {
+      const r = await window.storage.get(KEY);
+      if (r && r.value) state = Object.assign({ sessions: {}, last: {}, swaps: {} }, JSON.parse(r.value));
+      status('');
+    } catch (e) {
+      status('No saved history yet — this session will be your first.');
+    }
+  }
+
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async () => {
+      try {
+        await window.storage.set(KEY, JSON.stringify(state));
+        status('Saved');
+        setTimeout(() => status(''), 1200);
+      } catch (e) {
+        status("Couldn't save — your entries are still on screen, but won't persist.");
+      }
+    }, 500);
+  }
+
+  const sess = () => (state.sessions[stamp] = state.sessions[stamp] || {});
+  const cell = (id, i) => {
+    const s = sess();
+    s[active] = s[active] || {};
+    s[active][id] = s[active][id] || [];
+    s[active][id][i] = s[active][id][i] || { w: '', r: '', done: false };
+    return s[active][id][i];
+  };
+
+  // ---------- rest timer ----------
+  let left = 0, tick = null;
+  function startRest() {
+    left = REST;
+    $('wtRest').dataset.on = '1';
+    clearInterval(tick);
+    tick = setInterval(() => {
+      left--;
+      paintClock();
+      if (left <= 0) { clearInterval(tick); }
+    }, 1000);
+    paintClock();
+  }
+  function paintClock() {
+    const m = Math.max(0, Math.floor(left / 60)), s = Math.max(0, left % 60);
+    $('wtClock').textContent = m + ':' + String(s).padStart(2, '0');
+    $('wtClock').dataset.zero = left <= 0 ? '1' : '0';
+    $('wtRestBar').style.width = Math.max(0, (left / REST) * 100) + '%';
+  }
+  $('wtRestStop').onclick = () => { clearInterval(tick); $('wtRest').dataset.on = '0'; };
+  $('wtRestAdd').onclick = () => { left += 30; paintClock(); };
+
+  // ---------- render ----------
+  function setCount(ex) {
+    const m = (ex.target || '').match(/(\d+)\s*×/);
+    return m ? +m[1] : 1;
+  }
+
+  function render() {
+    $('wtDate').textContent = today.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+
+    $('wtDays').innerHTML = DAYS.map(d =>
+      `<button class="wt-day" role="tab" data-d="${d}" aria-selected="${d === active}">
+         ${PLAN[d].label}<small>${PLAN[d].sub}</small>
+       </button>`).join('');
+    $('wtDays').querySelectorAll('.wt-day').forEach(b =>
+      b.onclick = () => { active = b.dataset.d; render(); });
+
+    const list = PLAN[active].ex;
+    $('wtList').innerHTML = list.map((ex, n) => {
+      const total = setCount(ex);
+      const rows = [];
+      let doneCount = 0;
+
+      for (let i = 0; i < total; i++) {
+        const c = cell(ex.id, i);
+        if (c.done) doneCount++;
+        const isTime = ex.kind === 'time';
+        rows.push(
+          `<div class="wt-set">
+             <div class="wt-set-n">${i + 1}</div>
+             ${isTime ? '' : `<input class="wt-in" type="number" inputmode="decimal" placeholder="kg"
+                 value="${c.w}" data-x="${ex.id}" data-i="${i}" data-f="w">
+               <div class="wt-unit">KG</div>`}
+             <input class="wt-in" type="number" inputmode="numeric"
+               placeholder="${isTime ? 'sec' : 'reps'}" value="${c.r}"
+               data-x="${ex.id}" data-i="${i}" data-f="r">
+             <div class="wt-unit">${isTime ? 'SEC' : 'REPS'}</div>
+             <button class="wt-tick" data-on="${c.done ? 1 : 0}" data-x="${ex.id}" data-i="${i}"
+               aria-label="Mark set ${i + 1} complete">✓</button>
+           </div>`);
+      }
+
+      const swapped = state.swaps[active + ':' + ex.id];
+      const prev = state.last[ex.id];
+
+      return `<div class="wt-card" data-flag="${ex.flag || ''}" data-done="${doneCount === total ? 1 : 0}"
+                   aria-expanded="false" data-card="${ex.id}">
+        <button class="wt-head" data-toggle="${ex.id}">
+          <div class="wt-idx">${n + 1}</div>
+          <div class="wt-headtext">
+            <div class="wt-name">${swapped || ex.name}</div>
+            <div class="wt-target">${ex.target}${swapped ? ' · swapped' : ''} · ${doneCount}/${total} logged</div>
+          </div>
+          <div class="wt-chev">▶</div>
+        </button>
+        <div class="wt-body">
+          ${ex.rx !== undefined ? `
+            <div class="wt-rx">
+              <div class="wt-rx-seg">${RX.map((r, k) =>
+                `<div data-on="${k === ex.rx ? 1 : 0}">${r}</div>`).join('')}</div>
+              <div class="wt-rx-note">${ex.rxNote}</div>
+            </div>` : ''}
+          ${ex.note ? `<p class="wt-note" data-flag="${ex.flag || ''}">${ex.note}</p>` : ''}
+          ${prev ? `<div class="wt-prev">Last time: <b>${prev}</b></div>` : ''}
+          ${rows.join('')}
+          ${ex.alts ? `
+            <button class="wt-swap" data-swap="${ex.id}">Equipment taken? Swap this ▾</button>
+            <div class="wt-alts" data-alts="${ex.id}">
+              <button class="wt-alt" data-pick="" data-x="${ex.id}" data-active="${!swapped ? 1 : 0}">
+                ${ex.name}<em>Original</em></button>
+              ${ex.alts.map(a => `<button class="wt-alt" data-pick="${a.n}" data-x="${ex.id}"
+                 data-active="${swapped === a.n ? 1 : 0}">${a.n}<em>${a.d}</em></button>`).join('')}
+            </div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    wire();
+    progress();
+  }
+
+  function wire() {
+    document.querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => {
+      const card = b.closest('.wt-card');
+      card.setAttribute('aria-expanded', card.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    });
+
+    document.querySelectorAll('.wt-in').forEach(inp => inp.oninput = () => {
+      cell(inp.dataset.x, +inp.dataset.i)[inp.dataset.f] = inp.value;
+      save();
+    });
+
+    document.querySelectorAll('.wt-tick').forEach(btn => btn.onclick = () => {
+      const c = cell(btn.dataset.x, +btn.dataset.i);
+      c.done = !c.done;
+      btn.dataset.on = c.done ? '1' : '0';
+
+      if (c.done) {
+        if (c.w || c.r) state.last[btn.dataset.x] = (c.w ? c.w + 'kg × ' : '') + (c.r || '?');
+        startRest();
+      }
+      save();
+
+      const card = btn.closest('.wt-card');
+      const ticks = card.querySelectorAll('.wt-tick');
+      const done = card.querySelectorAll('.wt-tick[data-on="1"]').length;
+      card.dataset.done = done === ticks.length ? '1' : '0';
+      card.querySelector('.wt-target').textContent =
+        card.querySelector('.wt-target').textContent.replace(/\d+\/\d+ logged/, done + '/' + ticks.length + ' logged');
+      progress();
+    });
+
+    document.querySelectorAll('[data-swap]').forEach(b => b.onclick = () => {
+      const box = document.querySelector(`[data-alts="${b.dataset.swap}"]`);
+      box.dataset.open = box.dataset.open === '1' ? '0' : '1';
+    });
+
+    document.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => {
+      const k = active + ':' + b.dataset.x;
+      if (b.dataset.pick) state.swaps[k] = b.dataset.pick; else delete state.swaps[k];
+      save();
+      render();
+      const card = document.querySelector(`[data-card="${b.dataset.x}"]`);
+      if (card) card.setAttribute('aria-expanded', 'true');
+    });
+  }
+
+  function progress() {
+    const list = PLAN[active].ex;
+    let total = 0, done = 0;
+    list.forEach(ex => {
+      const n = setCount(ex);
+      total += n;
+      for (let i = 0; i < n; i++) if (cell(ex.id, i).done) done++;
+    });
+    $('wtProg').style.width = (total ? (done / total) * 100 : 0) + '%';
+  }
+
+  $('wtReset').onclick = async () => {
+    state = { sessions: {}, last: {}, swaps: {} };
+    try { await window.storage.set(KEY, JSON.stringify(state)); status('History cleared.'); }
+    catch (e) { status("Couldn't clear saved history."); }
+    render();
+  };
+
+  load().then(render);
+})();
+</script>
