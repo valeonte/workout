@@ -1,9 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Session log">
+<meta name="theme-color" content="#16181D">
+<title>Session log</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
   *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #16181D;
+    min-height: 100%;
+  }
 
   .wt {
     --ink:        #16181D;
@@ -81,8 +99,8 @@
   }
   .wt-card[data-done="1"] .wt-idx { background: var(--go-dim); color: var(--go); }
   .wt-headtext { flex: 1; min-width: 0; }
-  .wt-name { font-family: var(--display); font-size: 19.5px; font-weight: 600; letter-spacing: .01em; line-height: 1.12; }
-  .wt-target { font-size: 11.5px; color: var(--muted); margin-top: 2px; letter-spacing: .01em; }
+  .wt-name { font-family: var(--display); font-size: 22px; font-weight: 600; letter-spacing: .01em; line-height: 1.12; }
+  .wt-target { font-size: 12.5px; color: var(--muted); margin-top: 3px; letter-spacing: .01em; }
   .wt-chev { flex: 0 0 auto; color: var(--muted); font-size: 12px; transition: transform .2s; }
   .wt-card[aria-expanded="true"] .wt-chev { transform: rotate(90deg); }
 
@@ -114,8 +132,8 @@
   .wt-set-n { flex: 0 0 22px; font-family: var(--display); font-size: 14px; color: var(--muted); font-weight: 600; }
   .wt-in {
     flex: 1; min-width: 0; background: var(--ink); border: 1px solid var(--line);
-    border-radius: 8px; padding: 11px 9px; color: var(--paper);
-    font-size: 15px; font-weight: 500; text-align: center; -moz-appearance: textfield;
+    border-radius: 8px; padding: 12px 9px; color: var(--paper);
+    font-size: 16px; font-weight: 500; text-align: center; -moz-appearance: textfield;
   }
   .wt-in::-webkit-outer-spin-button, .wt-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .wt-in::placeholder { color: #4E5665; font-weight: 400; }
@@ -163,6 +181,8 @@
   .wt-reset { font-size: 11.5px; color: var(--muted); text-decoration: underline; padding: 6px 0; }
   .wt-status { font-size: 11px; color: var(--muted); padding: 0 16px; min-height: 15px; }
 </style>
+</head>
+<body>
 
 <div class="wt">
   <div class="wt-top">
@@ -277,13 +297,45 @@
   const status = m => { $('wtStatus').textContent = m || ''; };
 
   // ---------- storage ----------
+  // Works in two places: inside Claude (window.storage) and as a standalone
+  // hosted/offline file (localStorage). Falls back to memory if both are blocked.
+  const STORE = (function () {
+    if (typeof window !== 'undefined' && window.storage && typeof window.storage.get === 'function') {
+      return {
+        mode: 'claude',
+        get: async k => { const r = await window.storage.get(k); return (r && r.value) || null; },
+        set: async (k, v) => { await window.storage.set(k, v); }
+      };
+    }
+    let ls = null;
+    try {
+      window.localStorage.setItem('__probe__', '1');
+      window.localStorage.removeItem('__probe__');
+      ls = window.localStorage;
+    } catch (e) { ls = null; }
+
+    const mem = {};
+    return {
+      mode: ls ? 'local' : 'memory',
+      get: async k => (ls ? ls.getItem(k) : (k in mem ? mem[k] : null)),
+      set: async (k, v) => { if (ls) ls.setItem(k, v); else mem[k] = v; }
+    };
+  })();
+
   async function load() {
     try {
-      const r = await window.storage.get(KEY);
-      if (r && r.value) state = Object.assign({ sessions: {}, last: {}, swaps: {} }, JSON.parse(r.value));
-      status('');
+      const raw = await STORE.get(KEY);
+      if (raw) {
+        state = Object.assign({ sessions: {}, last: {}, swaps: {} }, JSON.parse(raw));
+        status('');
+      } else {
+        status('No saved history yet — this session will be your first.');
+      }
     } catch (e) {
       status('No saved history yet — this session will be your first.');
+    }
+    if (STORE.mode === 'memory') {
+      status('This browser is blocking storage — entries will clear when you close the tab.');
     }
   }
 
@@ -291,7 +343,7 @@
     clearTimeout(saveTimer);
     saveTimer = setTimeout(async () => {
       try {
-        await window.storage.set(KEY, JSON.stringify(state));
+        await STORE.set(KEY, JSON.stringify(state));
         status('Saved');
         setTimeout(() => status(''), 1200);
       } catch (e) {
@@ -470,7 +522,7 @@
 
   $('wtReset').onclick = async () => {
     state = { sessions: {}, last: {}, swaps: {} };
-    try { await window.storage.set(KEY, JSON.stringify(state)); status('History cleared.'); }
+    try { await STORE.set(KEY, JSON.stringify(state)); status('History cleared.'); }
     catch (e) { status("Couldn't clear saved history."); }
     render();
   };
@@ -478,3 +530,6 @@
   load().then(render);
 })();
 </script>
+
+</body>
+</html>
