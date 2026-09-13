@@ -211,8 +211,9 @@
                  { n: 'Smith Squat → DB Press', d: 'Both racks busy — do the press separately after' }] },
 
         { id: 'leg-press', name: 'Leg Press', target: '3 × 10', flag: 'care',
-          note: 'Stop at roughly 90° knee bend. Set the seat so you physically cannot go deeper — do not judge it by feel mid-set.',
-          alts: [{ n: 'Hack Squat', d: 'Same depth limit — stop at 90°' },
+          note: 'Both legs. Stop at roughly 90° knee bend — set the seat so you physically cannot go deeper, do not judge it by feel mid-set.',
+          alts: [{ n: 'Single-Leg Leg Press', d: 'Progression — start well under half your two-leg weight' },
+                 { n: 'Hack Squat', d: 'Same depth limit — stop at 90°' },
                  { n: 'Goblet Squat', d: 'Machines busy — moderate DB, controlled' }] },
 
         { id: 'dl-ur', name: 'Deadlift → Upright Row', target: '3 × 8',
@@ -236,7 +237,7 @@
                  { n: 'DB Bench Press', d: 'Always available fallback' }] },
 
         { id: 'ham-seated', name: 'Seated Hamstring Curl', target: '3 × 12',
-          note: 'Unrestricted — stronger hamstrings are protective for the knee.',
+          note: 'Both legs. Unrestricted — stronger hamstrings are protective for the knee.',
           alts: [{ n: 'Lying Hamstring Curl', d: 'Seated machine taken' },
                  { n: 'Stiff-Leg Deadlift', d: 'Light weight, hinge pattern' }] },
 
@@ -299,9 +300,10 @@
           alts: [{ n: 'DB Deadlift → DB Upright Row', d: 'Rack taken' },
                  { n: 'Trap Bar Deadlift → DB Upright Row', d: 'Kinder on the low back' }] },
 
-        { id: 'leg-ext', name: 'Leg Extension', target: '3 × 12', flag: 'care',
-          note: 'Top half of the range only, light load. Open-chain, so load sits directly on the knee — the one machine most worth clearing with your physio before going full range.',
-          alts: [{ n: 'Terminal Knee Extension (band)', d: 'More conservative — band around the knee, straighten against it' },
+        { id: 'leg-ext', name: 'Single-Leg Leg Extension', target: '3 × 10 / leg', flag: 'care',
+          note: 'One leg at a time, top half of the range only, light. Start well under half a two-leg weight — the whole stack is on one limb. Match reps to what the operated leg can do, then repeat the same on the strong side; the goal is closing the gap, not widening it. Open-chain work is the item most worth clearing with your physio.',
+          alts: [{ n: 'Leg Extension (both legs)', d: 'If single-leg aggravates anything — same top-half range' },
+                 { n: 'Terminal Knee Extension (band)', d: 'More conservative — band around the knee, straighten against it' },
                  { n: 'Spanish Squat', d: 'Machine taken — closed-chain quad work' }] },
 
         { id: 'pullup', name: 'Assisted Pull-Up', target: '3 × 8',
@@ -323,7 +325,7 @@
                  { n: 'DB Floor Press', d: 'Last resort' }] },
 
         { id: 'ham-lying', name: 'Lying Hamstring Curl', target: '3 × 12',
-          note: 'Unrestricted.',
+          note: 'Both legs. Unrestricted.',
           alts: [{ n: 'Seated Hamstring Curl', d: 'Lying machine taken' },
                  { n: 'Stiff-Leg Deadlift', d: 'Light weight' }] },
 
